@@ -1,0 +1,18 @@
+import './index.css'
+
+const RepositoryItem = props => {
+  const {item} = props
+  const {name, issuesCount, forksCount, starsCount, avatarUrl, id} = item
+  return (
+    <li className="cont">
+      <h1>{name}</h1>
+      <p>{forksCount}</p>
+      <p>{starsCount}</p>
+      <p>{issuesCount}</p>
+      <img className="img" src={avatarUrl} alt={id} />
+    </li>
+  )
+}
+
+export default RepositoryItem
+

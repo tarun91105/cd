@@ -1,0 +1,96 @@
+import {Component} from 'react'
+import {v4 as uuid} from 'uuid'
+import LanguageFilterItem from '../LanguageFilterItem'
+import RepositoryItem from '../RepositoryItem'
+
+import './index.css'
+
+const languageFiltersData = [
+  {id: 'ALL', language: 'All'},
+  {id: 'JAVASCRIPT', language: 'Javascript'},
+  {id: 'RUBY', language: 'Ruby'},
+  {id: 'JAVA', language: 'Java'},
+  {id: 'CSS', language: 'CSS'},
+]
+
+class GithubPopularRepos extends Component {
+  state = {list: []}
+
+  componentDidMount() {
+    this.getList()
+  }
+
+  componentWillUnmount() {
+    const {list} = this.state
+    this.setState((list: []))
+  }
+
+  getList = async () => {
+    const url = `https://apis.ccbp.in/popular-repos?language=ALL`
+    const options = {
+      method: 'GET',
+    }
+    const response = await fetch(url, options)
+    const data = await response.json()
+    const items = data.popular_repos
+    const updatedData = await items.map(product => ({
+      name: product.name,
+      forksCount: product.forks_count,
+      avatarUrl: product.avatar_url,
+      id: product.id,
+      issuesCount: product.issues_count,
+      starsCount: product.stars_count,
+    }))
+
+    await this.setState({list: updatedData})
+  }
+
+  render() {
+    const apiCall = async op => {
+      const url = `https://apis.ccbp.in/popular-repos?language=${op}`
+      const options = {
+        method: 'GET',
+      }
+      const response = await fetch(url, options)
+      const data = await response.json()
+      const items = data.popular_repos
+      const updatedData = await items.map(product => ({
+        name: product.name,
+        forksCount: product.forks_count,
+        avatarUrl: product.avatar_url,
+        id: product.id,
+        issuesCount: product.issues_count,
+        starsCount: product.stars_count,
+      }))
+
+      await this.setState({list: updatedData})
+    }
+    const {list} = this.state
+
+    return (
+      <div className="mainCont">
+        <h1 className="main_heading">Popular</h1>
+        <div className="names-cont">
+          {languageFiltersData.map(i => (
+            <LanguageFilterItem
+              key={i.id}
+              name={i.language}
+              id={i.id}
+              apiCall={apiCall}
+            />
+          ))}
+        </div>
+        <div>
+          <ul className="items">
+            {list.map(u => (
+              <RepositoryItem key={uuid()} item={u} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+}
+
+export default GithubPopularRepos
+
