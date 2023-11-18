@@ -6,13 +6,27 @@ const RepositoryItem = props => {
   return (
     <li className="cont">
       <h1>{name}</h1>
-      <p>{forksCount}</p>
-      <p>{starsCount}</p>
-      <p>{issuesCount}</p>
-      <img className="img" src={avatarUrl} alt={id} />
+      <img
+        className="st"
+        src="https://assets.ccbp.in/frontend/react-js/forks-count-img.png "
+        alt="forks"
+      />
+      <p>{forksCount} forks</p>
+      <img
+        className="st"
+        src="https://assets.ccbp.in/frontend/react-js/stars-count-img.png"
+        alt="stars"
+      />
+      <p>{starsCount} stars</p>
+      <img
+        className="st"
+        src="https://assets.ccbp.in/frontend/react-js/issues-count-img.png"
+        alt="open issues"
+      />
+      <p>{issuesCount} open issues</p>
+      <img className="img" src={avatarUrl} alt={name} />
     </li>
   )
 }
 
 export default RepositoryItem
-
