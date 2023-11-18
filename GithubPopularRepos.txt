@@ -1,5 +1,6 @@
-import {Component} from 'react'
-import {v4 as uuid} from 'uuid'
+
+   import {Component} from 'react'
+import Loader from 'react-loader-spinner'
 import LanguageFilterItem from '../LanguageFilterItem'
 import RepositoryItem from '../RepositoryItem'
 
@@ -14,44 +15,24 @@ const languageFiltersData = [
 ]
 
 class GithubPopularRepos extends Component {
-  state = {list: []}
+  state = {list: [], status: '', type: 'ALL'}
 
   componentDidMount() {
     this.getList()
   }
 
   componentWillUnmount() {
-    const {list} = this.state
-    this.setState((list: []))
+    this.setState({list: []})
   }
 
   getList = async () => {
+    this.setState({status: 'loading'})
     const url = `https://apis.ccbp.in/popular-repos?language=ALL`
     const options = {
       method: 'GET',
     }
     const response = await fetch(url, options)
-    const data = await response.json()
-    const items = data.popular_repos
-    const updatedData = await items.map(product => ({
-      name: product.name,
-      forksCount: product.forks_count,
-      avatarUrl: product.avatar_url,
-      id: product.id,
-      issuesCount: product.issues_count,
-      starsCount: product.stars_count,
-    }))
-
-    await this.setState({list: updatedData})
-  }
-
-  render() {
-    const apiCall = async op => {
-      const url = `https://apis.ccbp.in/popular-repos?language=${op}`
-      const options = {
-        method: 'GET',
-      }
-      const response = await fetch(url, options)
+    if (response.status === 200) {
       const data = await response.json()
       const items = data.popular_repos
       const updatedData = await items.map(product => ({
@@ -62,35 +43,100 @@ class GithubPopularRepos extends Component {
         issuesCount: product.issues_count,
         starsCount: product.stars_count,
       }))
-
-      await this.setState({list: updatedData})
+      console.log(response)
+      await this.setState({list: updatedData, status: 'success'})
+    } else if (response.status === 401) {
+      await this.setState({list: [], status: 'failure'})
     }
-    const {list} = this.state
+  }
 
+  apiCall = async op => {
+    this.setState({status: 'loading'})
+    console.log('click')
+    const url = `https://apis.ccbp.in/popular-repos?language=${op}`
+    const options = {
+      method: 'GET',
+    }
+    const response = await fetch(url, options)
+    if (response.ok === true) {
+      const data = await response.json()
+      const items = data.popular_repos
+      const updatedData = await items.map(product => ({
+        name: product.name,
+        forksCount: product.forks_count,
+        avatarUrl: product.avatar_url,
+        id: product.id,
+        issuesCount: product.issues_count,
+        starsCount: product.stars_count,
+      }))
+      console.log('success')
+      await this.setState({list: updatedData, status: 'success'})
+    } else if (response.status === 401) {
+      await this.setState({list: [], status: 'failure'})
+    }
+  }
+
+  loadingView = () => (
+    <div data-testid="loader">
+      <Loader type="ThreeDots" color="#0284c7" height={80} width={80} />
+    </div>
+  )
+
+  failureView = () => (
+    <div>
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/api-failure-view.png"
+        alt="failure view"
+      />
+    </div>
+  )
+
+  successView = () => {
+    const {list} = this.state
+    console.log('view done')
     return (
-      <div className="mainCont">
-        <h1 className="main_heading">Popular</h1>
-        <div className="names-cont">
-          {languageFiltersData.map(i => (
-            <LanguageFilterItem
-              key={i.id}
-              name={i.language}
-              id={i.id}
-              apiCall={apiCall}
-            />
-          ))}
-        </div>
+      <div>
         <div>
           <ul className="items">
             {list.map(u => (
-              <RepositoryItem key={uuid()} item={u} />
+              <RepositoryItem key={u.id} item={u} />
             ))}
           </ul>
+        </div>
+        <div className="mainCont">
+          <h1 className="main_heading">Popular</h1>
+          <div className="names-cont">
+            {languageFiltersData.map(i => (
+              <LanguageFilterItem
+                key={i.id}
+                name={i.language}
+                id={i.id}
+                apiCall={this.apiCall}
+              />
+            ))}
+          </div>
         </div>
       </div>
     )
   }
+
+
+
+  render() {
+    const {status} = this.state
+    console.log('here')
+
+    switch (status) {
+      case 'success':
+        return this.successView()
+      case 'failure':
+        return this.failureView()
+      case 'loading':
+        return this.loadingView()
+      default:
+        return null
+    }
+  }
 }
 
 export default GithubPopularRepos
-
